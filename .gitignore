@@ -1,0 +1,9 @@
+# Nuvole di punti e risultati delle conversioni (lo script di conversione resta versionato)
+data/*
+!data/running.sh
+
+# Storage di MinIO
+minio_data/
+
+# Cesium non è usato dal visualizzatore e contiene un token Mapbox predefinito
+html_public/libs/Cesium/

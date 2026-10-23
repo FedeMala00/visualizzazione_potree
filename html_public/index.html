@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="utf-8">
+    <title>Visualizzatore Potree Cloud</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <link rel="stylesheet" type="text/css" href="./build/potree/potree.css">
+    <link rel="stylesheet" type="text/css" href="./libs/jquery-ui/jquery-ui.min.css">
+    <link rel="stylesheet" type="text/css" href="./libs/openlayers3/ol.css">
+    <link rel="stylesheet" type="text/css" href="./libs/spectrum/spectrum.css">
+    <link rel="stylesheet" type="text/css" href="./libs/jstree/themes/mixed/style.css">
+</head>
+
+<body>
+    <script src="./libs/jquery/jquery-3.1.1.min.js"></script>
+    <script src="./libs/spectrum/spectrum.js"></script>
+    <script src="./libs/jquery-ui/jquery-ui.min.js"></script>
+    <script src="./libs/three.js/build/three.min.js"></script>
+    <script src="./libs/other/BinaryHeap.js"></script>
+    <script src="./libs/tween/tween.min.js"></script>
+    <script src="./libs/d3/d3.js"></script>
+    <script src="./libs/proj4/proj4.js"></script>
+    <script src="./libs/openlayers3/ol.js"></script>
+    <script src="./libs/i18next/i18next.js"></script>
+    <script src="./libs/jstree/jstree.js"></script>
+    <script src="./build/potree/potree.js"></script>
+    <script src="./libs/plasio/js/laslaz.js"></script>
+
+    <div class="potree_container" style="position: absolute; width: 100%; height: 100%; left: 0px; top: 0px; ">
+        <div id="potree_render_area"></div>
+        <div id="potree_sidebar_container"> </div>
+    </div>
+
+    <script>
+        window.viewer = new Potree.Viewer(document.getElementById("potree_render_area"));
+        viewer.setEDLEnabled(true);
+        viewer.useHQ = true;
+        viewer.setEDLRadius(1.0);
+        viewer.setFOV(60);
+        viewer.setPointBudget(10_000_000);
+        viewer.loadSettingsFromURL();
+        viewer.loadGUI(() => {
+            viewer.setLanguage('en');
+            $("#menu_appearance").next().show();
+        });
+
+        fetch("/dati3d/pointclouds/latest.json")
+            .then(response => response.json())
+            .then(dati => {
+                let urlDati = "/dati3d/pointclouds/" + dati.ultima_mappa + "/metadata.json";
+
+                Potree.loadPointCloud(urlDati, dati.ultima_mappa, function (e) {
+                    let scene = viewer.scene;
+                    let pointcloud = e.pointcloud;
+
+                    let material = pointcloud.material;
+                    material.size = 0;
+                    material.minSize = 0.4;
+                    material.pointSizeType = Potree.PointSizeType.ADAPTIVE;
+                    material.shape = Potree.PointShape.CIRCLE;
+                    material.activeAttributeName = "elevation";
+
+                    scene.addPointCloud(pointcloud);
+                    viewer.fitToScreen();
+                });
+            })
+            .catch(error => {
+                console.error("file latest.json non trovato", error);
+            });
+    </script>
+</body>
+
+</html>
