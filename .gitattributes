@@ -1,0 +1,2 @@
+# Gli script girano nei container Linux: mantieni sempre i terminatori LF
+*.sh text eol=lf
